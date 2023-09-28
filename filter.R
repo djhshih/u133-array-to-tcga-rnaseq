@@ -102,6 +102,6 @@ dim(probes.nof)[1] # 1859
 probes.f <- subset(probes.info, !nof.cond)
 dim(probes.f)[1] # 10535
 
-# write out probe annotation for all probes
+# write out probe annotation for all probes, indicating filter status
 qwrite(probes.f, "annot/probes.rds");
 

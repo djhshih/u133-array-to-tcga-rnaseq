@@ -3,6 +3,7 @@
 library(io)
 library(ggplot2)
 library(dplyr)
+library(scam)
 
 # for production use
 #library(array2rnaseq)
@@ -16,10 +17,6 @@ probes <- qread("../probes/probes.rds");
 rseq <- as.matrix(qread("../expr/rna_seq_exprs_t_matched.rds"));
 marr <- as.matrix(qread("../expr/micro_exprs_matched.rds"));
 
-# Range expressed for each probes
-marr.lim <- c(min(marr), max(marr))
-rseq.lim <- c(min(rseq, na.rm = TRUE), max(rseq, na.rm = TRUE))
-
 # ensure that probes annotation are in correct order
 stopifnot(probes$entrez == rownames(rseq))
 stopifnot(probes$entrez == rownames(marr))
@@ -29,45 +26,50 @@ rownames(rseq) <- probes$gene;
 rownames(marr) <- probes$gene;
 
 probes.f <- probes[probes$keep, ];
-rseq.f <- rseq[probes$keep, ];
 marr.f <- marr[probes$keep, ];
+rseq.f <- rseq[probes$keep, ];
+J <- nrow(marr.f);
 
-# linear regression
-lm.fits <- lapply(rownames(rseq.f), function(g) {
-  lm(rseq.f[g, ] ~ marr.f[g, ])
-});
+models <- select_models(marr.f, rseq.f);
+models[1:5] <- "scam";
+table(models)
 
-lm.summaries <- lapply(lm.fits, summary);
+maps <- array2rnaseq(marr.f, rseq.f, models=models);
 
-# construct linear model statistics
-lm.d <- data.frame(
-  rse = unlist(lapply(lm.summaries, function(x) x$sigma)),
-  r2 = unlist(lapply(lm.summaries, function(x) x$r.squared))
-);
+preds <- predict.array2rnaseq(maps, marr.f);
 
-hist(lm.d$r2, breaks = 100)
-summary(lm.d$r2)
+# predictions
+plot(marr.f, preds$mean, pch=".")
 
-# select probes that can be fitted using linear model
-r2.cut <- 0.95;
-linear.idx <- which(lm.d$r2 > r2.cut);
-length(linear.idx)
+# calibration plot
+plot(preds$mean, rseq.f, pch=".", col=models)
+abline(a=0, b=1, col="grey")
+cor(c(preds$mean), c(rseq.f), use="complete.obs")
 
-# --- linear map ---
+# examine specific genes
+gene <- 164;
+plot(marr.f[gene, ], preds$mean[gene, ], pch=".")
+points(marr.f[gene, ], preds$lower[gene, ], pch=".", col="blue")
+points(marr.f[gene, ], preds$upper[gene, ], pch=".", col="blue")
+points(marr.f[gene, ], rseq.f[gene, ], pch=".", col="red")
 
-lin.pred <- lapply(linear.idx,
-  function(j) {
-    linear_map(marr[j, ], rseq[j, ], level = 0.95)
-  }
-);
+rs <- unlist(lapply(1:J,
+  function(j) cor(rseq.f[j, ], preds$mean[j, ])
+));
+summary(rs)
 
-# calculate fev for all gene based on linear model
-fevs.lin <- unlist(lapply(1:length(linear.idx), function(j) {
-  fev.func(rseq[linear.idx[j], ], lin.pred[[j]]$fit)
-}));
-summary(fevs.lin)
+fves <- unlist(lapply(1:J,
+  function(j) fve(rseq.f[j, ], preds$mean[j, ])
+));
+summary(fves)
 
-# TODO refactor
+
+# TODO refactor and clean up garbage below
+
+
+# Range expressed for each probes
+marr.lim <- c(min(marr), max(marr))
+rseq.lim <- c(min(rseq, na.rm = TRUE), max(rseq, na.rm = TRUE))
 
 # Scatter plots of multiple genes fitted on the linear model
 scatter.s(X = marrt.f.lin, Y = rseqt.f.lin, probes = probes.f.lin, pred = lin.pred,

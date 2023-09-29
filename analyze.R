@@ -15,6 +15,11 @@ load_all("~/projects/r/array2rnaseq")
 probes <- qread("annot/probes.rds");
 rseq
 
+
+# Range expressed for each probes
+marrt.lim <- c(min(marrt), max(marrt))
+rseq.lim <- c(min(rseq, na.rm = TRUE), max(rseqt, na.rm = TRUE))
+
 rseqt.f <- rseqt[rownames(rseqt) %in% probes.f$genes, ]
 marrt.f <- marrt[rownames(marrt) %in% probes.f$genes, ]
 

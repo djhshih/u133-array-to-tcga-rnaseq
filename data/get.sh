@@ -1,8 +1,9 @@
 #!/bin/bash
-# Retrieve data
+# Retrieve raw data
 
 set -euo pipefail
 
 # TODO (with help from Noel)
 
-
+# wget
+# curl

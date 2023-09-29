@@ -76,7 +76,7 @@ hist(probes.info$mi, breaks = 100)
 
 # identify probes that are too noisy
 mi.cut <- quantile(probes.info$mi, 0.15, na.rm=TRUE);
-probes.info$noisy <- probes.info$mi >= mi.cut;
+probes.info$noisy <- probes.info$mi < mi.cut;
 
 probes.info$keep <- with(probes.info, !constant & p_na == 0 & !noisy);
 

@@ -18,8 +18,8 @@ load_all("~/projects/r/array2rnaseq")
 
 
 db <- org.Hs.eg.db
-marr <- as.matrix(qread("micro_exprs_matched.rds"));
-rseq <- as.matrix(qread("rna_seq_exprs_t_matched.rds"));
+marr <- as.matrix(qread("../expr/micro_exprs_matched.rds"));
+rseq <- as.matrix(qread("../expr/rna_seq_exprs_t_matched.rds"));
 
 dim(marr) # 12664   294
 dim(rseq) # 12664   294
@@ -84,5 +84,5 @@ head(probes.info)
 table(probes.info$keep)
 
 # write out probe annotation for all probes, indicating filter status
-qwrite(probes.info, "../annot/probes.rds");
+qwrite(probes.info, "probes.rds");
 

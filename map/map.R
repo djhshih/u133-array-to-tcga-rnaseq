@@ -1,7 +1,6 @@
-# Analyze filtered ata
+# Learn mapping from microarray to RNA-seq
 
 library(io)
-library(org.Hs.eg.db)
 library(ggplot2)
 library(dplyr)
 
@@ -12,60 +11,63 @@ library(dplyr)
 library(devtools)
 load_all("~/projects/r/array2rnaseq")
 
-probes <- qread("annot/probes.rds");
-rseq
-
+# read in data
+probes <- qread("../probes/probes.rds");
+rseq <- as.matrix(qread("../expr/rna_seq_exprs_t_matched.rds"));
+marr <- as.matrix(qread("../expr/micro_exprs_matched.rds"));
 
 # Range expressed for each probes
-marrt.lim <- c(min(marrt), max(marrt))
-rseq.lim <- c(min(rseq, na.rm = TRUE), max(rseqt, na.rm = TRUE))
+marr.lim <- c(min(marr), max(marr))
+rseq.lim <- c(min(rseq, na.rm = TRUE), max(rseq, na.rm = TRUE))
 
-rseqt.f <- rseqt[rownames(rseqt) %in% probes.f$genes, ]
-marrt.f <- marrt[rownames(marrt) %in% probes.f$genes, ]
+# ensure that probes annotation are in correct order
+stopifnot(probes$entrez == rownames(rseq))
+stopifnot(probes$entrez == rownames(marr))
 
-# Linear regression
-## Linear model
-lm <- lapply(probes.f$genes, function(g) {
-  lm(rseqt.f[g, ] ~ marrt.f[g, ])
-})
-summary_lst <- lapply(lm, summary)
+# annotate gene names
+rownames(rseq) <- probes$gene;
+rownames(marr) <- probes$gene;
 
-## linear property for each probes
-rse <- r.2 <- adj.r.2 <- coef <- c()
-for (i in 1:dim(probes.f)[1]) {
-  rse <- append(rse, summary_lst[[i]]$sigma) # Residual standard error
-  r.2 <- append(r.2, summary_lst[[i]]$r.squared)
-  adj.r.2 <- append(adj.r.2, summary_lst[[i]]$adj.r.squared)
-}
-probes.f <- cbind(probes.f, rse = rse, r.2 = r.2, adj.r.2 = adj.r.2)
-hist(r.2, breaks = 100)
+probes.f <- probes[probes$keep, ];
+rseq.f <- rseq[probes$keep, ];
+marr.f <- marr[probes$keep, ];
 
+# linear regression
+lm.fits <- lapply(rownames(rseq.f), function(g) {
+  lm(rseq.f[g, ] ~ marr.f[g, ])
+});
 
-# Linear functional probes classified by R^2
-# 237 probes follow linear model
-curve.cond <- r.2 < 0.95
-probes.f.lin <- subset(probes.f, !curve.cond)
-curve_idx <- which(curve.cond)
-rseqt.f.lin <- rseqt.f[-curve_idx, ]
-marrt.f.lin <- marrt.f[-curve_idx, ]
-func.lin <- lm[rownames(rseqt.f.lin)]
-dim(rseqt.f.lin)[1] # 237
-length(func.lin) # 237
+lm.summaries <- lapply(lm.fits, summary);
 
+# construct linear model statistics
+lm.d <- data.frame(
+  rse = unlist(lapply(lm.summaries, function(x) x$sigma)),
+  r2 = unlist(lapply(lm.summaries, function(x) x$r.squared))
+);
 
+hist(lm.d$r2, breaks = 100)
+summary(lm.d$r2)
 
-# --- linear model ---
+# select probes that can be fitted using linear model
+r2.cut <- 0.95;
+linear.idx <- which(lm.d$r2 > r2.cut);
+length(linear.idx)
 
-# Implement linear model for all genes
-lin.pred <- lapply(1:dim(marrt.f.lin)[1], function(i) {
-  linear(i, X = marrt.f.lin, Y = rseqt.f.lin, level = 0.95)
+# --- linear map ---
+
+lin.pred <- lapply(linear.idx,
+  function(j) {
+    linear_map(marr[j, ], rseq[j, ], level = 0.95)
   }
-)
+);
 
+# calculate fev for all gene based on linear model
+fevs.lin <- unlist(lapply(1:length(linear.idx), function(j) {
+  fev.func(rseq[linear.idx[j], ], lin.pred[[j]]$fit)
+}));
+summary(fevs.lin)
 
-# Calculate fev for all gene based on linear model
-fev.lin <- unlist(lapply(1:length(lin.pred), function(i) {fev.func(rseqt.f.lin[i, ], lin.pred[[i]]$fit)}))
-
+# TODO refactor
 
 # Scatter plots of multiple genes fitted on the linear model
 scatter.s(X = marrt.f.lin, Y = rseqt.f.lin, probes = probes.f.lin, pred = lin.pred,
@@ -81,7 +83,6 @@ scatter.s(X = marrt.f.lin, Y = rseqt.f.lin, probes = probes.f.lin, pred = lin.pr
 
 # --- weighted least square ---
 
-# Implement SCAM model for all genes
 wlin.pred <- lapply(1:dim(marrt.f.lin)[1], function(i) {
   linear(i, X = marrt.f.lin, Y = rseqt.f.lin, level = 0.95, w = NULL)
 }

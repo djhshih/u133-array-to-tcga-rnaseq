@@ -18,3 +18,6 @@ mv ./1b5f413e-a8d1-4d10-92eb-7c4ae739ed81/TCGA-CDR-SupplementalTableS1.xlsx ./pa
 
 # remove the directory
 rm -rf 1b5f413e-a8d1-4d10-92eb-7c4ae739ed81 
+
+# preprocess the data
+Rscript preprocess.R

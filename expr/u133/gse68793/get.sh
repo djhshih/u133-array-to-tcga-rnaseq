@@ -33,9 +33,8 @@ cd -
 sed -i '1i files' raw_lst.tsv
 
 # get pheno data
-#Rscript ./download_gse53963.R
+Rscript ./download_pheno.R
 
-# Run limma
-# only keep exprs that can map to annot
-#Rscript ./run_limma.R
+# Run frma
+Rscript run_frma.R
 

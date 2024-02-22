@@ -15,7 +15,7 @@ pheno_df <- pheno_df[, c("title", "geo_accession", "source_name_ch1", "age:ch1",
 # Clean
 pheno_df$title <- sub("EXP-592: ", "", pheno_df$title)
 
-pheno_df$source_name_ch1 <- gsub("Primary solid tumor", "yes", pheno_df$source_name_ch1);
+pheno_df$source_name_ch1 <- tolower(gsub(" ", "_", pheno_df$source_name_ch1));
 
 pheno_df$`disease staging:ch1` <- gsub("Stage ", "", pheno_df$`disease staging:ch1`);
 pheno_df$`histologic type:ch1` <- tolower(gsub(" ", "_", pheno_df$`histologic type:ch1`));
@@ -31,7 +31,7 @@ pheno_df[pheno_df == "[Not Available]"] = NA;
 table(pheno_df$source_name_ch1)
 pheno_df[1:2,]
 
-colnames(pheno_df) <- c("bcr_patient_barcode", "geo_accession", "primary_solid_tumor",
+colnames(pheno_df) <- c("bcr_patient_barcode", "geo_accession", "cancer_type",
   "age", "clinical_m_stage", "disease_stage", "histologic_type", "cigarette_pack_per_year",
   "pathologic_n_stage", "pathologic_t_stage", "sex", "smoking_history")
 

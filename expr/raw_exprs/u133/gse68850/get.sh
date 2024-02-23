@@ -33,8 +33,8 @@ cd -
 sed -i '1i files' raw_lst.tsv
 
 # get pheno data
-#Rscript ./download_pheno.R
+Rscript ./download_pheno.R
 
 # Run frma
-#Rscript run_frma.R
+Rscript run_frma.R
 

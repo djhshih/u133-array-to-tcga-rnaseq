@@ -3,7 +3,7 @@
 google-sheet: https://docs.google.com/spreadsheets/d/1slOnzy5JBgjehcCMs6_1qRtbGzgjbGBuQwXt1H0OBzA/edit?usp=sharing
 
 # Download and preprocess data
-We will be focusing on the TCGA dataset. For the rna-seq data, we download it through PANCAN; for the microarray data, we download them through the GEO.
+We will be focusing on the TCGA dataset. For the rna-seq data, we download it through PANCAN; for the microarray data, we download them through the GEO. Details of the datasets can be found in the google sheet stated above.
 
 Expression and phenotype annotation are stored in `./exprs`
 

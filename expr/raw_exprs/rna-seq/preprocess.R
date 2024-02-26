@@ -51,5 +51,5 @@ stopifnot(colnames(exprs_df) == pheno_df$bcr_patient_barcode)
 exprs_df[1:5, 1:5]
 pheno_df[1:5, 1:5]
 
-qwrite(exprs_df, "exprs_df.rds");
-qwrite(pheno_df, "pheno_df.tsv");
+qwrite(exprs_df, "rna-seq_exprs.rds");
+qwrite(pheno_df, "rna-seq_pheno.tsv");

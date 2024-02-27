@@ -7,4 +7,4 @@ We will be focusing on the TCGA dataset. For the rna-seq data, we download it th
 
 Expression data are stored in `./exprs/`
 
-TODO: better directory name for `./preprocessed_exprs/`?
+TODO: better directory name for `./exprs/raw_exprss/`?

@@ -8,7 +8,7 @@ source("../../../R/clean.R")
 rna_exprs <- qread("../../raw_exprs/rna-seq/rna_exprs.rds");
 microarray_exprs <- qread("../../raw_exprs/u133/gse68793/gse68793_exprs.rds");
 
-dim(rna_exprs) # 20531 10230
+dim(rna_exprs) # 20531 11069
 rna_exprs[1:3, 1:4]
 
 dim(microarray_exprs) # 22277   134

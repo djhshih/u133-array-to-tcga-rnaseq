@@ -14,20 +14,7 @@ To download and preprocess the raw TCGA dataset from PanCanAtlas:
 - script: `./rna-seq/get_pancan.sh`
 - outputs: 
     - `./rna-seq/pancan_exprs.tsv`
-    - `./rna-seq/pancan_pheno.xlsx`
     - `./rna-seq/patient_barcode_ref.tsv`
-    - `./rna-seq/exprs_df-matched.tsv`
-    - `./rna-seq/pheno_df-matched.tsv`
 
 ## Download and preprocess u133 microarray bulk expression data
-
-
-(old)
-```
-# download raw data
-./get.sh
-# preprocess data
-Rscript preprocess.R
-# filter genes
-Rscript filter.R
-```
+Run the `get.sh` script in each directory in `./u133/`.
